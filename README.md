@@ -7,10 +7,10 @@ MoSCoW
 
 ###M
 - Man page
-- Fix space bug (columns should be min. 1 space + 3 wide and grow from there)
+- ~Fix space bug (columns should be min. 1 space + 3 wide and grow from there)~
 
 ###S
-- Makefile
+- ~Makefile~
 
 ###C
 - FASTQ support

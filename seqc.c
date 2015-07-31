@@ -7,15 +7,17 @@
 
 int main(int argc, char** argv) {
   int c;
-  int countnuc  = 0;
+  int countnuc  = 1;
   int countseq  = 1;
   int countlong = 0;
   int sgiven = 0;
+  int cgiven = 0;
 
   while ((c = getopt(argc, argv, ":csL")) != -1) {
     switch(c) {
     case 'c':
       countnuc = 1;
+      cgiven = 1;
       if (!sgiven) {
         countseq = 0;
       }
@@ -23,11 +25,17 @@ int main(int argc, char** argv) {
     case 's':
       countseq = 1;
       sgiven = 1;
+      if (!cgiven) {
+        countnuc = 0;
+      }
       break;
     case 'L':
       countlong = 1;
       if (!sgiven) {
         countseq = 0;
+      }
+      if (!cgiven) {
+        countnuc = 0;
       }
       break;
     case '?':
@@ -80,9 +88,17 @@ int main(int argc, char** argv) {
     }
 
 
-    max_width = digitlen(longest) <= max_width ? max_width : digitlen(longest);
-    max_width = digitlen(nuc) <= max_width ? max_width : digitlen(nuc);
-    max_width = digitlen(sc) <= max_width ? max_width : digitlen(sc);
+    if (countlong) {
+      max_width = digitlen(longest) <= max_width ? max_width : digitlen(longest);
+    }
+    
+    if (countnuc) {
+      max_width = digitlen(nuc) <= max_width ? max_width : digitlen(nuc);
+    }
+
+    if (countseq) {
+      max_width = digitlen(sc) <= max_width ? max_width : digitlen(sc);
+    }
 
     counts[0][line_i] = longest;
     counts[1][line_i] = nuc;
@@ -98,9 +114,15 @@ int main(int argc, char** argv) {
   }
 
   if (totals) {
-    max_width = digitlen(maxl) <= max_width ? max_width : digitlen(maxl);
-    max_width = digitlen(totn) <= max_width ? max_width : digitlen(totn);
-    max_width = digitlen(tots) <= max_width ? max_width : digitlen(tots);
+    if (countlong) {
+      max_width = digitlen(maxl) <= max_width ? max_width : digitlen(maxl);
+    }
+    if (countnuc) {
+      max_width = digitlen(totn) <= max_width ? max_width : digitlen(totn);
+    }
+    if (countseq) {
+      max_width = digitlen(tots) <= max_width ? max_width : digitlen(tots);
+    }
   }
 
   int i;
