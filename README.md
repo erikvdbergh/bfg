@@ -21,3 +21,7 @@ MoSCoW
 
 ###W
 - Other filetypes?
+
+# sgrep
+
+FASTA grep
