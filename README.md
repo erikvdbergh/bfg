@@ -1,27 +1,14 @@
 # bfg
 Bioinformatics For Genomes tool package
 
-# seqc
-sequence count (part of bfg)
+Tools:
+- seqc - count sequences, nucleotides
+- sgrep - find sequences by name or contents
+- subseq - get subsequence (planned)
+- revcomp - reverse complement a sequence (planned)
 
-fasta only for now
-
-MoSCoW
-
-###M
-- Man page
-- ~~Fix space bug (columns should be min. 1 space + 3 wide and grow from there)~~
-
-###S
-- ~~Makefile~~
-
-###C
-- FASTQ support
-  - Automatic detection of filetype
-
-###W
-- Other filetypes?
-
-# sgrep
-
-FASTA grep
+Goals:
+- KISS design (No dependencies, one function per tool)
+- command line and pipe friendly
+- Open source (GPLv2)
+- Fast (written in C, optimized for huge files, low memory where possible)
