@@ -25,19 +25,36 @@ struct Opts {
   int filegiven;
 };
 
-void opts_init(struct Opts opts) {
+struct Opts opts;
+
+void opts_init() {
   opts.file_i = 0;
   opts.filegiven = 0;
 }
 
-void parseopts(int argc, char **argv, struct Opts opts) {
+void parseopts2(int argc, char **argv) {
   struct option longopts[] = {
     {"file"  , required_argument, NULL, 'f'},
     {"quiet"  , no_argument, NULL, 'q'},
     {"silent"  , no_argument, NULL, 'q'},
     {"no-messages", no_argument, NULL, 's'},
-    {"begin"  , no_argument, NULL, 'b'},
-    {"end"  , no_argument, NULL, 'e'},
+    {"begin"  , required_argument, NULL, 'b'},
+    {"end"  , required_argument, NULL, 'e'}
+  };
+  char c;
+  while ((c = getopt_long(argc, argv, ":f:qsb:e:", longopts, NULL)) != -1) {
+  }
+}
+
+void parseopts(int argc, char **argv) {
+  struct option longopts[] = {
+    {"file"  , required_argument, NULL, 'f'},
+    {"quiet"  , no_argument, NULL, 'q'},
+    {"silent"  , no_argument, NULL, 'q'},
+    {"no-messages", no_argument, NULL, 's'},
+    {"begin"  , required_argument, NULL, 'b'},
+    {"end"  , required_argument, NULL, 'e'},
+    {0, 0, 0, 0}
   };
   char c;
   while ((c = getopt_long(argc, argv, ":f:qsb:e:", longopts, NULL)) != -1) {
@@ -83,8 +100,9 @@ void parseopts(int argc, char **argv, struct Opts opts) {
   }
 
   if (!opts.begingiven && !opts.endgiven) {
-    opts.begin = atoi(argv[optind++]);
-    opts.end = atoi(argv[optind++]);
+    //opts.begin = atoi(argv[optind++]);
+    //opts.end = atoi(argv[optind++]);
+    //TODO needs error checking;
   }
 
   if (!opts.filegiven) {
@@ -100,14 +118,16 @@ void process_file(FILE *fp) {
 
 int main(int argc, char** argv) {
 
-  struct Opts opts;
-  parseopts(argc, argv, opts);
+  opts_init();
+  parseopts(argc, argv);
 
-  FILE *fp = stdin;
+  if (opts.file_i == 0) {
+    process_file(stdin);
+  }
 
   int file_i;
   for (file_i = 0; file_i < opts.file_i; file_i++) {
-    fp = open_file(opts.files[file_i]);
+    FILE *fp = open_file(opts.files[file_i]);
     process_file(fp);
   }
 

@@ -1,5 +1,6 @@
 // TODO name search only as default - speed optimization
 // TODO optional seq search
+// TODO FIx not reading from stdin
 
 #include <stdio.h>
 #include <getopt.h>

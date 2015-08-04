@@ -1,6 +1,7 @@
 CC        =   gcc
 INCDIR    =   ./inc
-CFLAGS    =   -I$(INCDIR) -O3 -Wall -Werror
+#CFLAGS    =   -I$(INCDIR) -O3 -Wall -Werror -g
+CFLAGS    =   -I$(INCDIR) -Wall -ggdb
 OBJDIR    =   bin
 OBJ       =   $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, seqc/seqc.c sgrep/sgrep.c subseq/subseq.c))
 DEPS      =   util.c

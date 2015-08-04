@@ -1,3 +1,4 @@
+// TODO fix prgram not reading from stdin
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
