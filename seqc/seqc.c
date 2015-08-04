@@ -5,6 +5,16 @@
 #define MAX_FILENAME_LEN 2048
 #define MAX_FILES 2048
 
+int digitlen(int i) {
+  int len = 0;
+  do {
+    ++len;
+    i /= 10;
+  } while (i);
+
+  return len;
+}
+
 int main(int argc, char** argv) {
   int c;
   int countnuc  = 1;
@@ -159,12 +169,3 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-int digitlen(int i) {
-  int len = 0;
-  do {
-    ++len;
-    i /= 10;
-  } while (i);
-
-  return len;
-}

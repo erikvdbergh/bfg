@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "util.h"
+
 #define MAX_FILENAME_LEN 2048
 #define MAX_FILES 2048
 #define MAX_REGEX_LEN 2048
@@ -128,22 +130,13 @@ void compile_regexes(regex_t regexes[]) {
       cflags |= REG_ICASE;
     }
 
-    if (comp_res = regcomp(&regexes[i], opts.regexes_input[i], cflags)) {
+    if ( (comp_res = regcomp(&regexes[i], opts.regexes_input[i], cflags)) ) {
       fprintf(stderr, "Invalid expression in regex %s\n", opts.regexes_input[i]);
       exit(EXIT_FAILURE);
     }
   }
 }
 
-FILE* open_file(char filename[]) {
-  FILE *fp = fopen(filename, "r");
-
-  if (fp == NULL) {
-    fprintf(stderr, "Unable to open file\n");
-    return NULL;
-  }
-  return fp;
-}
 
 void readfile(FILE *fp, regex_t regexes[]) {
   int seq_size_init = 8388608;
@@ -195,7 +188,7 @@ void readfile(FILE *fp, regex_t regexes[]) {
 	  cur_match = 1;
 	}
       } else {
-        char *msgbuf;
+        char msgbuf[4096];
 	regerror(reti, &regexes[i], msgbuf, sizeof(msgbuf));
 	fprintf(stderr, "Regex match failed: %s\n", msgbuf);
       }
@@ -209,7 +202,6 @@ int main(int argc, char** argv) {
 
   FILE *fp = stdin;
   char filename[MAX_FILENAME_LEN] = "";
-  char filenames[MAX_FILENAME_LEN][MAX_FILES];
 
   while (optind < argc) {
     strcpy(filename, argv[optind++]);
@@ -223,4 +215,5 @@ int main(int argc, char** argv) {
 
     readfile(fp, regexes);
   }
+  return 0;
 }
