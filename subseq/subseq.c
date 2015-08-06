@@ -107,7 +107,7 @@ int parseopts(int argc, char **argv) {
 
   if (opts.begin > opts.end) {
     if (!opts.quiet) {
-      fprintf(stderr, "subseq: Begin coordinate is higher than end coordinate, swapping. Try revcomp for reverse complement\n";
+      fprintf(stderr, "subseq: Begin coordinate is higher than end coordinate, swapping. Try revcomp for reverse complement\n");
     }
     int temp = opts.begin;
     opts.begin = opts.end;
@@ -123,57 +123,17 @@ int parseopts(int argc, char **argv) {
   return 0;
 }
 
-int process_file(FILE *fp) {
-  int nuc_pos = 0;
-  int insub = 0;
-  char subseq[MAX_SEQ_LEN];
-
-  while (fscanf(fp, "%s", line) != EOF) {
-    if (line[0] == '>') {
-      nuc_pos = 0;
-    } else {
-      if (!insub) {
-        linelen = strlen(line);
-        if (nuc_pos + linelen > opts.begin && nuc_pos + linelen > opts.end) { // subseq in one line
-          if (line = substr(line, opts.begin - nuc_pos, opts.end - nuc_pos)) {
-            strcpy(subseq, line);
-          } else {
-            //substr error
-          }
-        } else if (nuc_pos + linelen > opts.begin) {
-          if (line = substr(line, opts.begin - nuc_pos, linelen)) {
-          strcpy(subseq, line);
-          } else {
-            //substr error
-          }
-          insub = 1;
-          continue;
-        }
-      } else {
-        linelen = strlen(line);
-        if (nuc_pos + linelen > opts.end) {
-          if (line = substr(line, nuc_pos, opts.end - nuc_pos)) {
-            strcpy(subseq, strcat(subseq, line);
-          } else {
-            // substr error
-          }
-        }
-      }
-    }
-  }
-}
-
-char *substr(char *str, int start, int end) {
+int substr(char *str, int start, int end) {
   if (start > end) {
     int temp = start;
     start = end;
     end = temp;
   }
 
-  int sl = strlen(str)
+  int sl = strlen(str);
   if (end - start > sl || end > sl || start > sl) {
-    fprintf(stderr, "substr: desired length longer than string\n";
-    return NULL;
+    fprintf(stderr, "substr: desired length longer than string\n");
+    return 1;
   }
 
   int sublen = end - start;
@@ -185,8 +145,58 @@ char *substr(char *str, int start, int end) {
   tempstr[temp_i] = '\0';
   strcpy(str, tempstr);
 
-  return str;
+  return 0;
 }
+
+int process_file(FILE *fp) {
+  int nuc_pos = 0;
+  int insub = 0;
+  char subseq[MAX_SEQ_LEN];
+
+  char line[MAX_LINE_LEN];
+
+  while (fscanf(fp, "%s", line) != EOF) {
+    if (line[0] == '>') {
+      nuc_pos = 0;
+    } else {
+      int linelen = strlen(line);
+      if (!insub) {
+        if (nuc_pos + linelen > opts.begin && nuc_pos + linelen > opts.end) { // subseq in one line
+          if (!substr(line, opts.begin - nuc_pos, opts.end - nuc_pos)) {
+            strcpy(subseq, line);
+          } else {
+            return 1;
+            //substr error
+          }
+        } else if (nuc_pos + linelen > opts.begin) {
+          if (!substr(line, opts.begin - nuc_pos, linelen)) {
+          strcpy(subseq, line);
+          } else {
+            //substr error
+            return 1;
+          }
+          insub = 1;
+          continue;
+        }
+      } else {
+        if (nuc_pos + linelen > opts.end) {
+          if (!substr(line, nuc_pos, opts.end - nuc_pos)) {
+            strcpy(subseq, strcat(subseq, line));
+          } else {
+            // substr error
+            return 1;
+          }
+        } else {
+          nuc_pos += linelen;
+          strcpy(subseq, strcat(subseq, line));
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
 
 int main(int argc, char** argv) {
 
