@@ -140,58 +140,42 @@ void compile_regexes(regex_t regexes[]) {
 
 
 void readfile(FILE *fp, regex_t regexes[]) {
-  int seq_size_init = 8388608;
-  int seq_size = seq_size_init;
-  char *seq_cur = NULL;
-  seq_cur = (char *) realloc(seq_cur, seq_size * sizeof(char));
-
   int matchcount = 0;
 
   int cur_match = 0;
 
   char line[MAX_LINE_LEN];
 
-  int lines= 0;
+  //int lines= 0;
 
   while (fscanf(fp, "%s", line) != EOF) {
-    fprintf(stderr, "reading line %i\n", lines++);
+    //fprintf(stderr, "reading line %i\n", lines++);
     if (line[0] == '>') {
-      if (cur_match) {
-        printmatch(seq_cur);
-	cur_match = 0;
+      cur_match = 0;
+      int i;
+      for (i = 0; i < opts.regex_i; i++) {
+        int reti = regexec(&regexes[i], line, 0, NULL, 0);
+        if (!reti) {
+          matchcount++;
+          if (!opts.invert_m) {
+            if (!(opts.max_count != 0 && matchcount > opts.max_count)) {
+              cur_match = 1;
+              printf("%s\n", line);
+            }
+          }
+        } else if (reti == REG_NOMATCH) {
+          if (opts.invert_m) {
+            cur_match = 1;
+          }
+        } else {
+          char msgbuf[4096];
+          regerror(reti, &regexes[i], msgbuf, sizeof(msgbuf));
+          fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+        }
       }
-
-      seq_cur = (char *) realloc(seq_cur, seq_size_init * sizeof(char));
-      seq_size = seq_size_init;
-      memset(seq_cur, 0, strlen(seq_cur));
-    }
-
-    if (strlen(line) + strlen(seq_cur) > seq_size) { // NEED MOAR MEM
-      seq_size *= 2;
-      fprintf(stderr, "enlarging mem to %i\n", seq_size);
-      seq_cur = (char *) realloc(seq_cur, seq_size * sizeof(char));
-    }
-    
-    seq_cur = strcat(seq_cur, strcat(line,"\n"));
-
-    int i; 
-    for (i = 0; i < opts.regex_i; i++) {
-      int reti = regexec(&regexes[i], line, 0, NULL, 0);
-      if (!reti) {
-        matchcount++;
-	if (!opts.invert_m) {
-	  if (!(opts.max_count != 0 && matchcount > opts.max_count)) {
-	    cur_match = 1;
-	  }
-	}
-      } else if (reti == REG_NOMATCH) {
-	if (opts.invert_m) {
-	  cur_match = 1;
-	}
-      } else {
-        char msgbuf[4096];
-	regerror(reti, &regexes[i], msgbuf, sizeof(msgbuf));
-	fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+    } else {
+      if (cur_match) {
+        printf("%s\n", line);
       }
     }
   }

@@ -4,7 +4,7 @@ Bioinformatics For Genomes tool package
 Tools:
 - seqc - count sequences, nucleotides
 - sgrep - find sequences by name or contents
-- subseq - get subsequence (planned)
+- subseq - get subsequence
 - revcomp - reverse complement a sequence (planned)
 
 Goals:

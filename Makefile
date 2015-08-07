@@ -1,11 +1,15 @@
 CC        =   gcc
 INCDIR    =   ./inc
-#CFLAGS    =   -I$(INCDIR) -O3 -Wall -Werror -g
-CFLAGS    =   -I$(INCDIR) -Wall -ggdb
+
+# We dont need -Ox, I tried, it matters not.
+CFLAGS    =   -I$(INCDIR) -Wall -Werror 
+
+# debug
+#CFLAGS    =   -I$(INCDIR) -Wall -ggdb -pg
+
 OBJDIR    =   bin
 OBJ       =   $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, seqc/seqc.c sgrep/sgrep.c subseq/subseq.c))
 DEPS      =   util.c
-#OBJ       =   $(addprefix $(OBJDIR)/, seqc sgrep subseq)
 
 .PHONY: all clean
 
