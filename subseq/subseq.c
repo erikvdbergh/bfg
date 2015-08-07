@@ -142,7 +142,7 @@ int substr(char *str, int start, int end) {
 
   int sl = strlen(str);
   if (end - start > sl || end > sl || start > sl) {
-    fprintf(stderr, "substr: desired length longer than string\n");
+    //fprintf(stderr, "substr: desired length longer than string\n");
     return 1;
   }
 
@@ -158,62 +158,60 @@ int substr(char *str, int start, int end) {
   return 0;
 }
 
+void printseq(char *seqid, char *seq) {
+  if (strcmp(seqid, "") && strcmp(seq, "")) {
+  }
+}
+void print_header(char *seqid) {
+  if (opts.header_coord) {
+    printf("%s|%i:%i\n", seqid, opts.begin, opts.end);
+  } else {
+    printf("%s\n", seqid);
+  }
+}
+
 int process_file(FILE *fp) {
-  int nuc_pos = 0;
-  int insub = 0;
-  char subseq[2048];
   char seqid[2048];
+
+  int insub = 0;
+  int nuc_pos = 0;
 
   char line[MAX_LINE_LEN];
 
   while (fscanf(fp, "%s", line) != EOF) {
     if (line[0] == '>') {
-      if (strcmp(seqid, "")) {
-        if (opts.header_coord) {
-          printf("%s|%i:%i\n%s\n", seqid, opts.begin, opts.end, subseq);
-        } else {
-          printf("%s\n%s\n", seqid, subseq);
-        }
-      }
       strcpy(seqid, line);
       nuc_pos = 0;
     } else {
-      int linelen = strlen(line);
-      if (!insub) {
-        if (nuc_pos + linelen > opts.begin && nuc_pos + linelen > opts.end) { // subseq in one line
-          if (!substr(line, opts.begin - nuc_pos, opts.end - nuc_pos)) {
-            strcpy(subseq, line);
-          } else {
-            return 1;
-            //substr error
-          }
-        } else if (nuc_pos + linelen > opts.begin) {
-          if (!substr(line, opts.begin - nuc_pos, linelen)) {
-          strcpy(subseq, line);
-          } else {
-            //substr error
-            return 1;
-          }
+      int new_nuc_pos = nuc_pos + strlen(line);
+      if (opts.begin > nuc_pos && opts.begin < new_nuc_pos) {
+        if (opts.end <= new_nuc_pos) { //substr in this one line
+          substr(line, opts.begin - nuc_pos, opts.end - nuc_pos);
+
+          print_header(seqid);
+          printf("%s\n", line);
+        } else {
           insub = 1;
+          substr(line, opts.begin - nuc_pos, new_nuc_pos);
+
+          print_header(seqid);
+          printf("%s", line);
           continue;
         }
-        insub = 1;
-      } else {
-        if (nuc_pos + linelen > opts.end) {
-          if (!substr(line, nuc_pos, opts.end - nuc_pos)) {
-            strcpy(subseq, strcat(subseq, line));
-          } else {
-            // substr error
-            return 1;
-          }
+      }
+
+      if (insub) {
+        if (opts.end > nuc_pos && opts.end <= new_nuc_pos) {
+          substr(line, nuc_pos, opts.end - nuc_pos);
+          printf("%s\n", line);
+          insub = 0;
         } else {
-          nuc_pos += linelen;
-          strcpy(subseq, strcat(subseq, line));
+          printf("%s", line);
         }
       }
+      nuc_pos = new_nuc_pos;
     }
   }
-
   return 0;
 }
 
