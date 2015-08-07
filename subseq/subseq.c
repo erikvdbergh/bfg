@@ -177,14 +177,16 @@ int process_file(FILE *fp) {
   int nuc_pos = 0;
 
   char line[MAX_LINE_LEN];
+  char subseq[2048];
 
   while (fscanf(fp, "%s", line) != EOF) {
     if (line[0] == '>') {
       strcpy(seqid, line);
-      nuc_pos = 0;
+      strcpy(subseq, "");
+      nuc_pos = 1;
     } else {
       int new_nuc_pos = nuc_pos + strlen(line);
-      if (opts.begin > nuc_pos && opts.begin < new_nuc_pos) {
+      if (opts.begin >= nuc_pos && opts.begin < new_nuc_pos) {
         if (opts.end <= new_nuc_pos) { //substr in this one line
           substr(line, opts.begin - nuc_pos, opts.end - nuc_pos);
 
@@ -192,21 +194,24 @@ int process_file(FILE *fp) {
           printf("%s\n", line);
         } else {
           insub = 1;
-          substr(line, opts.begin - nuc_pos, new_nuc_pos);
+          substr(line, opts.begin - nuc_pos, new_nuc_pos - nuc_pos);
+          strcpy(subseq, line);
 
-          print_header(seqid);
-          printf("%s", line);
+          nuc_pos = new_nuc_pos;
           continue;
         }
       }
 
       if (insub) {
-        if (opts.end > nuc_pos && opts.end <= new_nuc_pos) {
-          substr(line, nuc_pos, opts.end - nuc_pos);
-          printf("%s\n", line);
+        if (opts.end >= nuc_pos && opts.end <= new_nuc_pos) {
+          substr(line, 0, opts.end - nuc_pos);
+
+          print_header(seqid);
+          printf("%s%s\n", subseq, line);
+
           insub = 0;
         } else {
-          printf("%s", line);
+          strcpy(subseq, strcat(subseq, line));
         }
       }
       nuc_pos = new_nuc_pos;
