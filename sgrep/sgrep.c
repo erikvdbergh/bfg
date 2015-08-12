@@ -148,8 +148,7 @@ void readfile(FILE *fp, regex_t regexes[]) {
 
   //int lines= 0;
 
-  while (fscanf(fp, "%s", line) != EOF) {
-    //fprintf(stderr, "reading line %i\n", lines++);
+  while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
     if (line[0] == '>') {
       cur_match = 0;
       int i;
@@ -160,7 +159,7 @@ void readfile(FILE *fp, regex_t regexes[]) {
           if (!opts.invert_m) {
             if (!(opts.max_count != 0 && matchcount > opts.max_count)) {
               cur_match = 1;
-              printf("%s\n", line);
+              printf("%s", line);
             }
           }
         } else if (reti == REG_NOMATCH) {
@@ -175,7 +174,7 @@ void readfile(FILE *fp, regex_t regexes[]) {
       }
     } else {
       if (cur_match) {
-        printf("%s\n", line);
+        printf("%s", line);
       }
     }
   }
