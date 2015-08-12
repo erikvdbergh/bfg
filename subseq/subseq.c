@@ -164,9 +164,9 @@ void printseq(char *seqid, char *seq) {
 }
 void print_header(char *seqid) {
   if (opts.header_coord) {
-    printf("%s|%i:%i\n", seqid, opts.begin, opts.end);
+    printf("%s|%i:%i", seqid, opts.begin, opts.end);
   } else {
-    printf("%s\n", seqid);
+    printf("%s", seqid);
   }
 }
 
@@ -179,13 +179,13 @@ int process_file(FILE *fp) {
   char line[MAX_LINE_LEN];
   char subseq[2048];
 
-  while (fscanf(fp, "%s", line) != EOF) {
+  while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
     if (line[0] == '>') {
       strcpy(seqid, line);
       strcpy(subseq, "");
       nuc_pos = 1;
     } else {
-      int new_nuc_pos = nuc_pos + strlen(line);
+      int new_nuc_pos = nuc_pos + strlen(line)-1 ;
       if (opts.begin >= nuc_pos && opts.begin < new_nuc_pos) {
         if (opts.end <= new_nuc_pos) { //substr in this one line
           substr(line, opts.begin - nuc_pos, opts.end - nuc_pos);
