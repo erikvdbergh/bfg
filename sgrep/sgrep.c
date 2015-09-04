@@ -26,14 +26,14 @@ struct Opts {
   int invert_m; //-v --invert-match DONE
   int word_m; // -w --word-regexp TODO
   int line_m;// -x --line-regexp TODO
-  int count; // -c --count TODO
+  int count; // -c --count DONE
   int color; // --color TODO
-  int files_nomatch; // -L --files-without-match TODO
-  int files_match; // -l --files-with-matches TODO
+  int files_nomatch; // -L --files-without-match DONE
+  int files_match; // -l --files-with-matches DONE
   int max_count; // -m --max-count DONE
-  int only_matching; // -o --only-matching - print matching part of line only TODO
-  int quiet; //-q --quiet --silent TODO
-  int nomsg; // -s --no-messages TODO
+  int only_matching; // -o --only-matching - print matching fasta header only TODO
+  int quiet; //-q --quiet --silent DONE
+  int nomsg; // -s --no-messages DONE
 };
 
 struct Opts opts;
@@ -69,7 +69,9 @@ void parseopts(int argc, char *argv[]) {
     switch(c) {
       case 'e':
         if (opts.regex_i > MAX_REGEXES) {
-          fprintf(stderr, "A maximum of %i regexes is supported, ignoring %s\n", MAX_REGEXES, optarg);
+          if (!opts.nomsg) {
+            fprintf(stderr, "A maximum of %i regexes is supported, ignoring %s\n", MAX_REGEXES, optarg);
+          }
 	} else {
           strcpy(opts.regexes_input[opts.regex_i++], optarg);
 	}
@@ -132,14 +134,17 @@ void compile_regexes(regex_t regexes[]) {
     }
 
     if ( (comp_res = regcomp(&regexes[i], opts.regexes_input[i], cflags)) ) {
-      fprintf(stderr, "Invalid expression in regex %s\n", opts.regexes_input[i]);
+      if (!opts.nomsg) {
+        fprintf(stderr, "Invalid expression in regex %s\n", opts.regexes_input[i]);
+      }
       exit(EXIT_FAILURE);
     }
   }
 }
 
-
-void readfile(FILE *fp, regex_t regexes[]) {
+// Note that the returned int does NOT indicate failure or success!
+// 1 is file matched, 0 is no match
+int readfile(FILE *fp, regex_t regexes[]) {
   int matchcount = 0;
 
   int cur_match = 0;
@@ -159,7 +164,13 @@ void readfile(FILE *fp, regex_t regexes[]) {
           if (!opts.invert_m) {
             if (!(opts.max_count != 0 && matchcount > opts.max_count)) {
               cur_match = 1;
-              printf("%s", line);
+              if (!opts.quiet && !opts.count && !opts.files_match && !opts.files_nomatch) {
+                printf("%s", line);
+              }
+
+              if (opts.files_match || opts.files_nomatch) {
+                return 1;
+              }
             }
           }
         } else if (reti == REG_NOMATCH) {
@@ -169,15 +180,25 @@ void readfile(FILE *fp, regex_t regexes[]) {
         } else {
           char msgbuf[4096];
           regerror(reti, &regexes[i], msgbuf, sizeof(msgbuf));
-          fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+          if (!opts.nomsg) {
+            fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+          }
         }
       }
     } else {
       if (cur_match) {
-        printf("%s", line);
+        if (!opts.quiet && !opts.count && !opts.only_matching) {
+          printf("%s", line);
+        }
       }
     }
   }
+
+  if (opts.count && !opts.quiet && !opts.files_match && !opts.files_nomatch) {
+    printf("%i\n", matchcount);
+  }
+
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -187,17 +208,42 @@ int main(int argc, char** argv) {
   FILE *fp = stdin;
   char filename[MAX_FILENAME_LEN] = "";
 
+  int files = 0;
+  int files_match = 0;
+
   while (optind < argc) {
     strcpy(filename, argv[optind++]);
-    fp = open_file(filename);
+    fp = open_file(filename, opts.nomsg, opts.quiet);
     if (!fp) {
-      continue;
+      return 1;
     }
+
+    files++;
 
     regex_t regexes[opts.regex_i];
     compile_regexes(regexes);
 
-    readfile(fp, regexes);
+    if (readfile(fp, regexes)) {
+      files_match++;
+      if (opts.files_match && !opts.quiet && !opts.count) {
+        printf("%s\n", filename);
+      }
+    } else {
+      if (opts.files_nomatch) {
+        if (!opts.quiet && !opts.count) {
+          printf("%s\n", filename);
+        }
+      }
+    }
+
   }
+
+  if (opts.count && opts.files_match && !opts.quiet) {
+    printf("%i\n", files_match);
+  }
+  if (opts.count && opts.files_nomatch && !opts.quiet) {
+    printf("%i\n", files - files_match);
+  }
+
   return 0;
 }
