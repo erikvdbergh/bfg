@@ -31,7 +31,7 @@ struct Opts {
   int files_nomatch; // -L --files-without-match DONE
   int files_match; // -l --files-with-matches DONE
   int max_count; // -m --max-count DONE
-  int only_matching; // -o --only-matching - print matching fasta header only TODO
+  int only_matching; // -o --only-matching - print matching fasta header only DONE
   int quiet; //-q --quiet --silent DONE
   int nomsg; // -s --no-messages DONE
 };
@@ -144,7 +144,7 @@ void compile_regexes(regex_t regexes[]) {
 
 // Note that the returned int does NOT indicate failure or success!
 // 1 is file matched, 0 is no match
-int readfile(FILE *fp, regex_t regexes[]) {
+int getfilematch(FILE *fp, regex_t regexes[]) {
   int matchcount = 0;
 
   int cur_match = 0;
@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
     regex_t regexes[opts.regex_i];
     compile_regexes(regexes);
 
-    if (readfile(fp, regexes)) {
+    if (getfilematch(fp, regexes)) {
       files_match++;
       if (opts.files_match && !opts.quiet && !opts.count) {
         printf("%s\n", filename);
