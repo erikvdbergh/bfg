@@ -1,8 +1,6 @@
-// TODO fix prgram not reading from stdin
-// TODO use longopts
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
+#include <getopt.h>
 
 #define MAX_FILENAME_LEN 2048
 #define MAX_FILES 2048
@@ -50,7 +48,14 @@ int parseopts(int argc, char **argv) {
   opts.countnuc = 1;
   opts.countseq = 1;
 
-  while ((c = getopt(argc, argv, ":csL")) != -1) {
+  struct option longopts[] = {
+    {"characters", no_argument, NULL, 'c'},
+    {"sequences", no_argument, NULL, 's'},
+    {"max-sequence-length", no_argument, NULL, 'L'},
+    {0, 0, 0, 0}
+  };
+
+  while ((c = getopt_long(argc, argv, ":csL", longopts, NULL)) != -1) {
     switch(c) {
     case 'c':
       opts.countnuc = 1;
@@ -131,16 +136,27 @@ int main(int argc, char** argv) {
     int curseq = 0; // length of sequence being read
     int longest = 0; // length of longest sequence
     
-    while (fgets(line, MAX_LINE_LEN, fp) != NULL) { //TODO switch to fgets
+    while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
       if (line[0] == '>') { // FASTA header, begin new sequence
 	sc++;
 	longest = curseq > longest ? curseq : longest;
 	curseq = 0;
       } else {
-	nuc    += strlen(line);
-	curseq += strlen(line);
+        int len = strlen(line);
+
+        //don't count newline
+        if (line[len] == '\0') {
+          len--;
+        }
+
+	nuc    += len;
+	curseq += len;
       }
     }
+
+    // let's not forget the last one
+    longest = curseq > longest ? curseq : longest;
+
 
 
     /* get max char length of numbers for formatting the final table with totals*/
@@ -204,14 +220,16 @@ int main(int argc, char** argv) {
 
     if (opts.countlong) {
       printf("%*d ", max_width, maxl);
+      printf("longest\n");
     }
     if (opts.countnuc) {
       printf("%*d ", max_width, totn);
+      printf("total\n");
     }
     if (opts.countseq) {
       printf("%*d ", max_width, tots);
+      printf("total\n");
     }
-    printf("total\n");
   }
 
   return 0;
