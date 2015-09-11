@@ -217,14 +217,19 @@ int process_file(FILE *fp) {
 
           insub = 0;
         } else {
-          //subseq_mem = cat_subseq(subseq, line, subseq_mem);
-
           int addlen = strlen(line);
           if (subseq_len + addlen > subseq_mem) {
             while (subseq_mem < subseq_len + addlen) {
               subseq_mem *= 2;
             }
-            subseq = realloc(subseq, subseq_mem * sizeof(char));
+            char *tmp = realloc(subseq, subseq_mem * sizeof(char));
+            if (tmp != NULL) {
+              subseq = tmp;
+            } else {
+              fprintf(stderr, "Unable to hold subseq in memory!");
+              free(subseq);
+              exit(EXIT_FAILURE);
+            }
           }
           subseq_len += addlen;
           strcat(subseq, line);
