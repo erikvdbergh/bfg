@@ -176,8 +176,11 @@ int process_file(FILE *fp) {
   int insub = 0;
   int nuc_pos = 0;
 
+  int subseq_len = 0;
+  int subseq_mem = 65536;
+
   char line[MAX_LINE_LEN];
-  char subseq[2048];
+  char *subseq = malloc(subseq_mem * sizeof(char));
 
   while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
     if (line[0] == '>') {
@@ -195,6 +198,9 @@ int process_file(FILE *fp) {
         } else {
           insub = 1;
           substr(line, opts.begin - nuc_pos, new_nuc_pos - nuc_pos);
+
+          // does not work if extracted subseq > 2048 (initial seq_mem); not sure if this will be a problem
+          subseq_len += strlen(line);
           strcpy(subseq, line);
 
           nuc_pos = new_nuc_pos;
@@ -211,12 +217,24 @@ int process_file(FILE *fp) {
 
           insub = 0;
         } else {
-          strcpy(subseq, strcat(subseq, line));
+          //subseq_mem = cat_subseq(subseq, line, subseq_mem);
+
+          int addlen = strlen(line);
+          if (subseq_len + addlen > subseq_mem) {
+            while (subseq_mem < subseq_len + addlen) {
+              subseq_mem *= 2;
+            }
+            subseq = realloc(subseq, subseq_mem * sizeof(char));
+          }
+          subseq_len += addlen;
+          strcat(subseq, line);
         }
       }
       nuc_pos = new_nuc_pos;
     }
   }
+
+  free(subseq);
   return 0;
 }
 

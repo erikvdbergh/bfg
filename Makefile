@@ -2,10 +2,10 @@ CC        =   gcc
 INCDIR    =   ./inc
 
 # We dont need -Ox, I tried, it matters not.
-CFLAGS    =   -I$(INCDIR) -Wall -Werror 
+#CFLAGS    =   -I$(INCDIR) -Wall -Werror 
 
 # debug
-#CFLAGS    =   -I$(INCDIR) -Wall -ggdb -pg
+CFLAGS    =   -I$(INCDIR) -Wall -ggdb
 
 OBJDIR    =   bin
 OBJ       =   $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, seqc/seqc.c sgrep/sgrep.c subseq/subseq.c))

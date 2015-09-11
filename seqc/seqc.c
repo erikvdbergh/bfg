@@ -44,7 +44,7 @@ int digitlen(int i) {
 int parseopts(int argc, char **argv) {
   char c;
 
-  // by default counts sequences and nucleotides
+  // by default count sequences and nucleotides
   opts.countnuc = 1;
   opts.countseq = 1;
 
@@ -95,11 +95,11 @@ int main(int argc, char** argv) {
   FILE *fp = stdin;
   char filename[256] = "";
 
-  /* print totals if more than 1 file */
+  // print totals if more than 1 file
   int totals = 0;
   totals = argc - optind > 1 ? 1 : 0;
 
-  /* no filename arguments left after opt parsing, read from stdin */
+  // no filename arguments left after opt parsing, read from stdin
   if (optind == argc) {
     argv[optind] = "-";
     argc++;
@@ -154,12 +154,12 @@ int main(int argc, char** argv) {
       }
     }
 
-    // let's not forget the last one
+    // let's not forget the last one, like always...
     longest = curseq > longest ? curseq : longest;
 
 
 
-    /* get max char length of numbers for formatting the final table with totals*/
+    // get max char length of numbers for formatting the final table with totals
     if (opts.countlong) {
       max_width = digitlen(longest) <= max_width ? max_width : digitlen(longest);
     }
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
     maxl = longest > maxl ? longest : maxl;
   }
 
-  /* if we are printing totals we need those character widths too */
+  // if we are printing totals we need those character widths too 
   if (totals) {
     if (opts.countlong) {
       max_width = digitlen(maxl) <= max_width ? max_width : digitlen(maxl);
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  /* print the whole lot */
+  // print the whole lot
   int i;
   for (i = 0; counts[0][i]; i++) {
     printf(" ");
