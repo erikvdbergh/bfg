@@ -21,7 +21,7 @@
 struct Opts {
   char regexes_input[MAX_REGEXES][MAX_REGEX_LEN]; //-e --regex DONE
   int regex_i;
-  char file[MAX_FILENAME_LEN]; //-f --file TODO
+  char file[MAX_FILENAME_LEN]; //-f --file DONE
   int ignore_c; //-i --ignore-case DONE
   int invert_m; //-v --invert-match DONE
   int word_m; // -w --word-regexp TODO
@@ -201,6 +201,28 @@ int getfilematch(FILE *fp, regex_t regexes[]) {
   return 0;
 }
 
+int read_regex_file(int argc, char **argv) {
+  FILE *fp = open_file(opts.file, opts.nomsg, opts.quiet);
+  if (!fp) {
+    return 1;
+  }
+
+  char line[MAX_LINE_LEN];
+  while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
+    line[strcspn(line, "\n")] = 0;
+    if (opts.regex_i == MAX_REGEXES) {
+      if (!opts.quiet && !opts.nomsg) {
+        fprintf(stderr, "Too many regexes, ignoring %s\n", line);
+        fprintf(stderr, "This version of sgrep was compiled with MAX_REGEXES: %i", MAX_REGEXES);
+      }
+    } else {
+      strcpy(opts.regexes_input[opts.regex_i++], line);
+    } 
+  }
+
+  return 0;
+}
+
 int main(int argc, char** argv) {
 
   parseopts(argc, argv);
@@ -210,6 +232,10 @@ int main(int argc, char** argv) {
 
   int files = 0;
   int files_match = 0;
+
+  if (opts.file) {
+    read_regex_file(argc, argv);
+  }
 
   while (optind < argc) {
     strcpy(filename, argv[optind++]);
