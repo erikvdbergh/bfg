@@ -209,6 +209,8 @@ int read_regex_file(int argc, char **argv) {
 
   char line[MAX_LINE_LEN];
   while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
+    // remove trailing newline, thanks to Tim Čas from StackOverflow 
+    // (http://stackoverflow.com/questions/2693776/removing-trailing-newline-character-from-fgets-input)
     line[strcspn(line, "\n")] = 0;
     if (opts.regex_i == MAX_REGEXES) {
       if (!opts.quiet && !opts.nomsg) {
