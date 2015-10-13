@@ -1,10 +1,12 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
 
-#define MAX_FILENAME_LEN 2048
-#define MAX_FILES 2048
-#define MAX_LINE_LEN 8192
+// TODO this should be growing as needed until no more memory can be allocated
+#define MAX_FILENAME_LEN 4096 // 255 = max filename, this supports that up to 20 subdirs
+#define MAX_FILES 4096 // TODO be able to change at compile time
+#define MAX_LINE_LEN 8192 // Not sure what to choose here
 
 /*
  * Global struct that holds cli options given
@@ -113,10 +115,20 @@ int main(int argc, char** argv) {
 
   // this shouldnt be on the stack, should be malloc'd TODO
   int counts[3][MAX_FILES]; // holds counts
-  char filenames[MAX_FILENAME_LEN][MAX_FILES]; //holds filenames for printing table
+
+  char **filenames = malloc(MAX_FILES * sizeof(char*));
+  if (filenames ) {
+    int i = 0;
+    for (i = 0; i < MAX_FILES; i++) {
+      filenames[i] = malloc(MAX_FILENAME_LEN * sizeof(char));
+    }
+  }
   int line_i = 0; // lines_read
 
-  while (optind < argc) {
+  int filecount = 0;
+
+  while (optind < argc && filecount < MAX_FILES-1) {
+    filecount++;
     strcpy(filename,argv[optind++]);
     if (strcmp(filename, "-")) {
       fp = fopen(filename, "r");
@@ -183,7 +195,8 @@ int main(int argc, char** argv) {
     totn += nuc;
 
     maxl = longest > maxl ? longest : maxl;
-  }
+  } 
+
 
   // if we are printing totals we need those character widths too 
   if (totals) {
@@ -221,15 +234,19 @@ int main(int argc, char** argv) {
     if (opts.countlong) {
       printf("%*d ", max_width, maxl);
       printf("longest\n");
-    }
-    if (opts.countnuc) {
-      printf("%*d ", max_width, totn);
+    } else {
+      if (opts.countnuc) {
+        printf("%*d ", max_width, totn);
+      }
+      if (opts.countseq) {
+        printf("%*d ", max_width, tots);
+      }
       printf("total\n");
     }
-    if (opts.countseq) {
-      printf("%*d ", max_width, tots);
-      printf("total\n");
-    }
+  }
+
+  if (filecount > MAX_FILES-2) {
+    fprintf(stderr, "seqc supports up to %i files, rest is ignored. Recompile with MAX_FILES=x if you need more\n", MAX_FILES);
   }
 
   return 0;
