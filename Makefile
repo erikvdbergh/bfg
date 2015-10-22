@@ -8,14 +8,8 @@ DEPS = $(INCDIR)/*
 
 all: bin/seqc bin/sgrep bin/subseq
 
-bin/seqc: src/seqc.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) src/seqc.c -o bin/seqc
-
-bin/sgrep: src/sgrep.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) src/sgrep.c -o bin/sgrep
-
-bin/subseq: src/subseq.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) src/subseq.c -o bin/subseq
+bin/%: src/%.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) $< -o $@
 
 .PHONY:clean
 clean:
