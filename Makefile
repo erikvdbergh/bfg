@@ -5,14 +5,14 @@ DEPS = $(INCDIR)/*
 
 all: bin/seqc bin/sgrep bin/subseq
 
-bin/seqc: seqc/seqc.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) seqc/seqc.c -o bin/seqc
+bin/seqc: src/seqc.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) src/seqc.c -o bin/seqc
 
-bin/sgrep: sgrep/sgrep.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) sgrep/sgrep.c -o bin/sgrep
+bin/sgrep: src/sgrep.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) src/sgrep.c -o bin/sgrep
 
-bin/subseq: subseq/subseq.c $(DEPS)
-	$(CC) $(CFLAGS) $(DEPS) subseq/subseq.c -o bin/subseq
+bin/subseq: src/subseq.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) src/subseq.c -o bin/subseq
 
 .PHONY:clean
 clean:
