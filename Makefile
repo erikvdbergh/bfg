@@ -1,6 +1,9 @@
 CC = gcc
 INCDIR = ./inc
-CFLAGS = -I$(INCDIR) -Wall -ggdb
+
+CFLAGS = -I$(INCDIR) -Wall -Werror -ggdb #debug
+#CFLAGS = -I$(INCDIR) -Wall -Werror
+
 DEPS = $(INCDIR)/*
 
 all: bin/seqc bin/sgrep bin/subseq
