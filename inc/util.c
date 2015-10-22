@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include "util.h"
+
 
 FILE *open_file(char filename[], int nomsg, int quiet) {
   FILE *fp;

@@ -1,26 +1,19 @@
-CC        =   gcc
-INCDIR    =   ./inc
+CC = gcc
+INCDIR = ./inc
+CFLAGS = -I$(INCDIR) -Wall -ggdb
+DEPS = $(INCDIR)/*
 
-# We dont need -Ox, I tried, it matters not.
-#CFLAGS    =   -I$(INCDIR) -Wall -Werror 
+all: bin/seqc bin/sgrep bin/subseq
 
-# debug
-CFLAGS    =   -I$(INCDIR) -Wall -ggdb
+bin/seqc: seqc/seqc.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) seqc/seqc.c -o bin/seqc
 
-OBJDIR    =   bin
-OBJ       =   $(addprefix $(OBJDIR)/, $(patsubst %.c, %.o, seqc/seqc.c sgrep/sgrep.c subseq/subseq.c))
-DEPS      =   util.c
+bin/sgrep: sgrep/sgrep.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) sgrep/sgrep.c -o bin/sgrep
 
-.PHONY: all clean
+bin/subseq: subseq/subseq.c $(DEPS)
+	$(CC) $(CFLAGS) $(DEPS) subseq/subseq.c -o bin/subseq
 
-all: $(OBJDIR) $(OBJ)
-
-$(OBJDIR):
-	mkdir $(OBJDIR)
-
-$(OBJDIR)/%.o : %.c $(INCDIR)/$(DEPS);
-	$(CC) $(CFLAGS) $< $(INCDIR)/$(DEPS) -o $(OBJDIR)/$(notdir $(basename $@))
-
+.PHONY:clean
 clean:
-	@rm -f $(TARGET) $(wildcard *.o)
-	@rm -rf $(OBJDIR) 
+	@rm -f bin/*

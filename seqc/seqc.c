@@ -3,6 +3,7 @@
 #include <string.h>
 #include <getopt.h>
 
+
 // TODO this should be growing as needed until no more memory can be allocated
 #define MAX_FILENAME_LEN 4096 // 255 = max filename, this supports that up to 20 subdirs
 #define MAX_FILES 4096 // TODO be able to change at compile time
