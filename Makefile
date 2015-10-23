@@ -6,7 +6,7 @@ CFLAGS = -I$(INCDIR) -Wall -Werror -ggdb #debug
 
 DEPS = $(INCDIR)/*
 
-all: bin/seqc bin/sgrep bin/subseq
+all: bin/seqc bin/sgrep bin/subseq bin/revcomp
 
 bin/%: src/%.c $(DEPS)
 	$(CC) $(CFLAGS) $(DEPS) $< -o $@
