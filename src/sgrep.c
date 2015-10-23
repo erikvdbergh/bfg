@@ -1,6 +1,5 @@
-// TODO name search only as default - speed optimization
-// TODO optional seq search
 // TODO FIx not reading from stdin
+// TODO file open message noto working correctly
 
 #include <stdio.h>
 #include <getopt.h>
