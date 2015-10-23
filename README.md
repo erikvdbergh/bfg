@@ -5,7 +5,7 @@ Tools:
 - seqc - count sequences, nucleotides
 - sgrep - find sequences by name
 - subseq - get subsequence
-- revcomp - reverse complement a sequence (planned)
+- revcomp - reverse complement a sequence
 
 Goals:
 - KISS design (No dependencies, one function per tool)
