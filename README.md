@@ -1,5 +1,5 @@
 # bfg
-Bioinformatics For Genomes tool package
+BFG For Genomics tool package
 
 Tools:
 - seqc - count sequences, nucleotides
