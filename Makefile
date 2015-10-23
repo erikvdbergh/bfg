@@ -1,10 +1,9 @@
 CC = gcc
-INCDIR = ./inc
 
 CFLAGS = -I$(INCDIR) -Wall -Werror -ggdb #debug
 #CFLAGS = -I$(INCDIR) -Wall -Werror
 
-DEPS = $(INCDIR)/*
+DEPS = src/util.c
 
 all: bin/seqc bin/sgrep bin/subseq bin/revcomp
 
