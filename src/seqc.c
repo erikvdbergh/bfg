@@ -3,39 +3,7 @@
 #include <string.h>
 #include <getopt.h>
 
-// TODO this should be growing as needed until no more memory can be allocated
-#define MAX_FILENAME_LEN 4096 // 255 = max filename, this supports that up to 20 subdirs
-#define MAX_FILES 4096 // TODO be able to change at compile time
-#define MAX_LINE_LEN 8192 // Not sure what to choose here
-
-/*
- * Global struct that holds cli options given
- */
-struct Opts {
-  int c;
-  int countnuc;
-  int countseq;
-  int countlong;
-  int sgiven;
-  int cgiven;
-};
-
-struct Opts opts;
-
-/*
- * Quick method to count the amount of digits in a number
- * @param i number to count digits
- * @return amount of digits in number
- */
-int digitlen(int i) {
-  int len = 0;
-  do {
-    ++len;
-    i /= 10;
-  } while (i);
-
-  return len;
-}
+#include "seqc_func.h"
 
 /*
  * Parse cli options using GNU getopt
@@ -43,7 +11,7 @@ int digitlen(int i) {
  * @param argv: cli arguments
  * @return: 0 on success
  */ 
-int parseopts(int argc, char **argv) {
+int parseopts(int argc, char **argv, Opts opts) {
   char c;
 
   // by default count sequences and nucleotides
@@ -92,7 +60,9 @@ int parseopts(int argc, char **argv) {
 }
 
 int main(int argc, char** argv) {
-  parseopts(argc, argv);
+  Opts opts;
+
+  parseopts(argc, argv, opts);
 
   FILE *fp = stdin;
   char filename[256] = "";
