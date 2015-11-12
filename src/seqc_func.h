@@ -11,14 +11,18 @@
 struct Opts;
 
 typedef struct OptsTag {
-  int c;
   int countnuc;
   int countseq;
   int countlong;
   int sgiven;
   int cgiven;
+  int totals;
 } Opts;
 
 int digitlen(int i); 
+
+int process_file(char *filename, int** counts, int file_i, int tots[4], Opts opts);
+
+void printcounts(int** counts, int tots[4], char** filenames, int file_i, Opts opts);
 
 #endif /* SEQC_H */

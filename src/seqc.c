@@ -11,12 +11,16 @@
  * @param argv: cli arguments
  * @return: 0 on success
  */ 
-int parseopts(int argc, char **argv, Opts opts) {
+int parseopts(int argc, char **argv, Opts *opts) {
   char c;
 
   // by default count sequences and nucleotides
-  opts.countnuc = 1;
-  opts.countseq = 1;
+  opts->sgiven = 0;
+  opts->cgiven = 0;
+  opts->totals = 0;
+  opts->countnuc = 1;
+  opts->countseq = 1;
+  opts->countlong = 0;
 
   struct option longopts[] = {
     {"characters", no_argument, NULL, 'c'},
@@ -28,26 +32,26 @@ int parseopts(int argc, char **argv, Opts opts) {
   while ((c = getopt_long(argc, argv, ":csL", longopts, NULL)) != -1) {
     switch(c) {
     case 'c':
-      opts.countnuc = 1;
-      opts.cgiven = 1;
-      if (!opts.sgiven) {
-        opts.countseq = 0;
+      opts->countnuc = 1;
+      opts->cgiven = 1;
+      if (!opts->sgiven) {
+        opts->countseq = 0;
       }
       break;
     case 's':
-      opts.countseq = 1;
-      opts.sgiven = 1;
-      if (!opts.cgiven) {
-        opts.countnuc = 0;
+      opts->countseq = 1;
+      opts->sgiven = 1;
+      if (!opts->cgiven) {
+        opts->countnuc = 0;
       }
       break;
     case 'L':
-      opts.countlong = 1;
-      if (!opts.sgiven) {
-        opts.countseq = 0;
+      opts->countlong = 1;
+      if (!opts->sgiven) {
+        opts->countseq = 0;
       }
-      if (!opts.cgiven) {
-        opts.countnuc = 0;
+      if (!opts->cgiven) {
+        opts->countnuc = 0;
       }
       break;
     case '?':
@@ -62,14 +66,12 @@ int parseopts(int argc, char **argv, Opts opts) {
 int main(int argc, char** argv) {
   Opts opts;
 
-  parseopts(argc, argv, opts);
+  parseopts(argc, argv, &opts);
 
-  FILE *fp = stdin;
-  char filename[256] = "";
+  //char filename[256] = "";
 
   // print totals if more than 1 file
-  int totals = 0;
-  totals = argc - optind > 1 ? 1 : 0;
+  opts.totals = argc - optind > 1 ? 1 : 0;
 
   // no filename arguments left after opt parsing, read from stdin
   if (optind == argc) {
@@ -77,148 +79,55 @@ int main(int argc, char** argv) {
     argc++;
   }
 
-  int tots = 0; // total number of sequences (in all files)
-  int totn = 0; // total number of nucleotides (in all files)
-  int maxl = 0; // longest sequence (in all files)
+  // hold totals across files
+  // tots[0] = nucleotides
+  // tots[1] = sequences
+  // tots[2] = longest seq
+  // tots[3] = character width of highest count (for print alignment)
+  int tots[4];
 
-  int max_width = 3; // default width of table column
+  tots[3] = 3; // default width of table column
 
-  // this shouldnt be on the stack, should be malloc'd TODO
-  int counts[3][MAX_FILES]; // holds counts
+  int **counts = malloc(3 * sizeof(int*));
+  if (counts) {
+    int i = 0;
+    for (i = 0; i < 3; i++) {
+      counts[i] = malloc(MAX_FILES * sizeof(int));
+    }
+  }
 
   char **filenames = malloc(MAX_FILES * sizeof(char*));
-  if (filenames ) {
+  if (filenames) {
     int i = 0;
     for (i = 0; i < MAX_FILES; i++) {
       filenames[i] = malloc(MAX_FILENAME_LEN * sizeof(char));
     }
   }
-  int line_i = 0; // lines_read
 
-  int filecount = 0;
+  int file_i = 0;
 
-  while (optind < argc && filecount < MAX_FILES-1) {
-    filecount++;
-    strcpy(filename,argv[optind++]);
-    if (strcmp(filename, "-")) {
-      fp = fopen(filename, "r");
-    } else {
-      fp = stdin;
-      strcpy(filename, "");
-    }
-
-    if (fp == NULL) {
-      fprintf(stderr, "Unable to open file\n");
-      return 1;
-    }
-
-    char line[MAX_LINE_LEN]; // holds line to read
-    int sc = 0; // no. of sequences in this file
-    int nuc = 0; // no. of nucleotides in this file
-    int curseq = 0; // length of sequence being read
-    int longest = 0; // length of longest sequence
-    
-    while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
-      if (line[0] == '>') { // FASTA header, begin new sequence
-	sc++;
-	longest = curseq > longest ? curseq : longest;
-	curseq = 0;
-      } else {
-        int len = strlen(line);
-
-        //don't count newline
-        if (line[len] == '\0') {
-          len--;
-        }
-
-	nuc    += len;
-	curseq += len;
-      }
-    }
-
-    // let's not forget the last one, like always...
-    longest = curseq > longest ? curseq : longest;
-
-
-
-    // get max char length of numbers for formatting the final table with totals
-    if (opts.countlong) {
-      max_width = digitlen(longest) <= max_width ? max_width : digitlen(longest);
-    }
-    
-    if (opts.countnuc) {
-      max_width = digitlen(nuc) <= max_width ? max_width : digitlen(nuc);
-    }
-
-    if (opts.countseq) {
-      max_width = digitlen(sc) <= max_width ? max_width : digitlen(sc);
-    }
-
-    counts[0][line_i] = longest;
-    counts[1][line_i] = nuc;
-    counts[2][line_i] = sc;
-    strcpy(filenames[line_i++],filename);
-
-    fclose(fp);
-
-    tots += sc;
-    totn += nuc;
-
-    maxl = longest > maxl ? longest : maxl;
+  while (optind < argc && file_i < MAX_FILES-1) {
+    process_file(argv[optind++], counts, file_i, tots, opts);
+    strcpy(filenames[file_i++],argv[optind-1]);
   } 
 
-
-  // if we are printing totals we need those character widths too 
-  if (totals) {
-    if (opts.countlong) {
-      max_width = digitlen(maxl) <= max_width ? max_width : digitlen(maxl);
-    }
-    if (opts.countnuc) {
-      max_width = digitlen(totn) <= max_width ? max_width : digitlen(totn);
-    }
-    if (opts.countseq) {
-      max_width = digitlen(tots) <= max_width ? max_width : digitlen(tots);
-    }
-  }
-
   // print the whole lot
-  int i;
-  for (i = 0; counts[0][i]; i++) {
-    printf(" ");
-    if (opts.countlong) {
-      printf("%*d ", max_width, counts[0][i]);
-    }
-    if (opts.countnuc) {
-      printf("%*d ", max_width, counts[1][i]);
-    }
-    if (opts.countseq) {
-      printf("%*d ", max_width, counts[2][i]);
-    }
-    printf("%s\n", filenames[i]);
-  }  
+  printcounts(counts, tots, filenames, file_i, opts);
 
-  if (totals) {
-
-    printf(" ");
-
-    if (opts.countlong) {
-      printf("%*d ", max_width, maxl);
-      printf("longest\n");
-    } else {
-      if (opts.countnuc) {
-        printf("%*d ", max_width, totn);
-      }
-      if (opts.countseq) {
-        printf("%*d ", max_width, tots);
-      }
-      printf("total\n");
-    }
-  }
-
-  if (filecount > MAX_FILES-2) {
+  if (file_i > MAX_FILES-2) {
     fprintf(stderr, "seqc supports up to %i files, rest is ignored. Recompile with MAX_FILES=x if you need more\n", MAX_FILES);
   }
 
+  // cleanup
+  int i = 0;
+  for (i = 0; i < 3; i++) {
+    free(counts[i]);
+  }
+  free(counts);
+  for (i = 0; i < MAX_FILES; i++) {
+    free(filenames[i]);
+  }
+  free(filenames);
+
   return 0;
 }
-
