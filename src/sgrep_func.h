@@ -1,6 +1,8 @@
 #ifndef SGREP_FUNC_H
 #define SGREP_FUNC_H
 
+#include <regex.h>
+
 #define MAX_FILENAME_LEN 2048
 #define MAX_FILES 2048
 #define MAX_REGEX_LEN 2048

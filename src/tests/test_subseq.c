@@ -4,7 +4,7 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include "seqc_func.h"
+#include "../subseq_func.h"
 
 /* Test Suite setup and cleanup functions: */
 
@@ -37,7 +37,6 @@ int main(void) {
 
    /* add the tests to the suite */
    if (
-        (NULL == CU_add_test(pSuite, "test_initseq", test_digitlen)) ||
         (NULL == CU_add_test(pSuite, "test_substr", test_substr)) || 
         (NULL == CU_add_test(pSuite, "test_printseq", test_printseq)) ||
         (NULL == CU_add_test(pSuite, "test_print_header", test_print_header)) ||

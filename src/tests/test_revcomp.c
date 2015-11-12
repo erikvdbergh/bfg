@@ -4,7 +4,7 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include "revcomp_func.h"
+#include "../revcomp_func.h"
 
 /* Test Suite setup and cleanup functions: */
 
@@ -16,18 +16,19 @@ int clean_suite(void) { return 0; }
 *		UNIT TESTS		*
 *					*
 ****************************************/
+Opts opts;
 
 void test_initseq(void) {
   char *seq = NULL;
   int seqsize = 20;
-  CU_ASSERT_FALSE(initseq(&seq, seqsize));
+  CU_ASSERT_FALSE(initseq(&seq, seqsize, opts));
   CU_ASSERT_PTR_NOT_NULL(seq);
 }
 
 void test_growseq(void) {
   int seqsize = 80;
   char *seq = calloc(seqsize, sizeof(char));
-  CU_ASSERT_FALSE(initseq(&seq, seqsize));
+  CU_ASSERT_FALSE(initseq(&seq, seqsize, opts));
   CU_ASSERT_PTR_NOT_NULL(seq);
 }
 

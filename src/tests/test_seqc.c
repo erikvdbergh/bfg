@@ -4,7 +4,7 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include "seqc_func.h"
+#include "../seqc_func.h"
 
 /* Test Suite setup and cleanup functions: */
 
