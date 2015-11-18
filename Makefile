@@ -7,7 +7,7 @@ DEPS = src/util.c
 
 all: bin/seqc bin/sgrep bin/subseq bin/revcomp 
 
-tests: test/revcomp test/sgrep test/subseq test/seqc
+tests: test/revcomp test/sgrep test/subseq test/seqc test/validate
 
 bin/%: src/%.c src/%_func.c $(DEPS)
 	$(CC) $(CFLAGS) $^ -o $@
@@ -19,6 +19,8 @@ test/sgrep: src/tests/test_sgrep.c src/revcomp_func.c $(DEPS)
 test/subseq: src/tests/test_subseq.c src/revcomp_func.c $(DEPS)
 	$(CC) $(TESTFLAGS) $^ -lcunit -o $@
 test/seqc: src/tests/test_seqc.c src/revcomp_func.c $(DEPS)
+	$(CC) $(TESTFLAGS) $^ -lcunit -o $@
+test/validate: src/tests/test_validate.c $(DEPS)
 	$(CC) $(TESTFLAGS) $^ -lcunit -o $@
 
 .PHONY:clean
