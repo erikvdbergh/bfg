@@ -70,7 +70,24 @@ void test_subseq(void) {
 }
 
 void test_sgrep(void) {
+  if (!fileexists("bin/sgrep") ||
+      !fileexists("testdata/test.fa") ||
+      !fileexists("test/results/sgreptest1") ||
+      !fileexists("test/results/sgreptest2")) {
+    return;
+  }
 
+  // regular file way with -e
+  system("bin/./sgrep -e \"seq2\" testdata/test.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/sgreptest1"));
+
+  // pipe through stdin
+  system("cat testdata/test.fa | bin/./sgrep -e \"seq2\" > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/sgreptest1"));
+
+  // two regexps
+  system("bin/./sgrep -e \"seq3\" -e \"seq2\" testdata/test.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/sgreptest2"));
 }
 
 void test_seqc(void) {
