@@ -15,7 +15,7 @@ void printmatch(char match[]) {
   printf("%s",match);
 }
 
-void compile_regexes(regex_t regexes[], Opts opts) {
+void compile_regexes(regex_t regexes[], SgrepOpts opts) {
   int i;
   for (i = 0; i < opts.regex_i; i++) {
     int comp_res;
@@ -36,7 +36,7 @@ void compile_regexes(regex_t regexes[], Opts opts) {
 
 // Note that the returned int does NOT indicate failure or success!
 // 1 is file matched, 0 is no match
-int getfilematch(FILE *fp, regex_t regexes[], Opts opts) {
+int getfilematch(FILE *fp, regex_t regexes[], SgrepOpts opts) {
   int matchcount = 0;
 
   int cur_match = 0;
@@ -93,7 +93,7 @@ int getfilematch(FILE *fp, regex_t regexes[], Opts opts) {
   return 0;
 }
 
-int read_regex_file(int argc, char **argv, Opts opts) {
+int read_regex_file(int argc, char **argv, SgrepOpts opts) {
   FILE *fp = open_file(opts.file, opts.nomsg, opts.quiet);
   if (!fp) {
     return 1;

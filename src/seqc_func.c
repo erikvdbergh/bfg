@@ -21,7 +21,7 @@ int digitlen(int i) {
   return len;
 }
 
-int process_file(char *filename, int** counts, int file_i, int tots[4], Opts opts) {
+int process_file(char *filename, int** counts, int file_i, int tots[4], SeqcOpts opts) {
   FILE *fp;
   if (!strcmp(filename, "-")) {
     fp = stdin; 
@@ -83,7 +83,7 @@ int process_file(char *filename, int** counts, int file_i, int tots[4], Opts opt
   return 0;
 }
 
-void printcounts(int** counts, int tots[4], char** filenames, int file_i, Opts opts) {
+void printcounts(int** counts, int tots[4], char** filenames, int file_i, SeqcOpts opts) {
 
   // if we are printing totals we need those character widths too 
   if (opts.totals) {

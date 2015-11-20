@@ -8,7 +8,7 @@
 #include "util.h"
 #include "subseq_func.h"
 
-void opts_init(Opts opts) {
+void opts_init(SubseqOpts opts) {
   opts.files = malloc(MAX_FILES * sizeof(char*));
   int i;
   for (i = 0; i < MAX_FILES ; i++) {
@@ -18,7 +18,7 @@ void opts_init(Opts opts) {
   opts.filegiven = 0;
 }
 
-int parseopts(int argc, char **argv, Opts opts) {
+int parseopts(int argc, char **argv, SubseqOpts opts) {
   struct option longopts[] = {
     {"file"  , required_argument, NULL, 'f'},
     {"quiet"  , no_argument, NULL, 'q'},
@@ -113,7 +113,7 @@ int parseopts(int argc, char **argv, Opts opts) {
 }
 
 int main(int argc, char** argv) {
-  Opts opts;
+  SubseqOpts opts;
   opts_init(opts);
   if (parseopts(argc, argv, opts)) { // something went wrong, returned 1
     return 1;

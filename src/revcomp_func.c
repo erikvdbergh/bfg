@@ -8,11 +8,11 @@
 #include "revcomp_func.h"
 
 // initialize the char array that holds the current sequence
-int initseq(char **seq, int seqsize, Opts opts) {
+int initseq(char **seq, int seqsize, int quiet) {
   *seq = calloc(seqsize,(sizeof(char)) );
 
   if (!seq) {
-    if (!opts.quiet) {
+    if (!quiet) {
       fprintf(stderr, "Could not allocate memory for sequence");
     }
     return 1;
@@ -22,13 +22,13 @@ int initseq(char **seq, int seqsize, Opts opts) {
 }
 
 // double the size of the seq array with realloc
-int grow_seq(char **seq, int seqsize, Opts opts) {
+int grow_seq(char **seq, int seqsize, int quiet) {
   seqsize *= 2;
 
   *seq = realloc(*seq, seqsize * sizeof(char));
 
   if (seq == NULL) {
-    if (!opts.quiet) {
+    if (!quiet) {
       fprintf(stderr, "Could not allocate memory for sequence");
     }
     return 1;
@@ -65,7 +65,7 @@ char *complement(char *seq) {
 }
 
 
-int process_file(FILE *fp, Opts opts) {
+int process_file(FILE *fp, RevcompOpts opts) {
 
   int seqsize = MAX_LINE_LEN;
   int readsize = 0;
@@ -73,7 +73,7 @@ int process_file(FILE *fp, Opts opts) {
   char header[MAX_LINE_LEN];
   char *seq = NULL;
 
-  if (initseq(&seq, seqsize, opts)) {
+  if (initseq(&seq, seqsize, opts.quiet)) {
     return 1;
   }
 
@@ -93,7 +93,7 @@ int process_file(FILE *fp, Opts opts) {
       // prepare new seq string
       free(seq);
       seqsize = MAX_LINE_LEN;
-      if (initseq(&seq, seqsize, opts)) {
+      if (initseq(&seq, seqsize, opts.quiet)) {
         return 1;
       }
 
@@ -106,7 +106,7 @@ int process_file(FILE *fp, Opts opts) {
 
       // current line will cause seq to overflow, grow it
       if (readsize + linelen > seqsize) {
-        if (grow_seq(&seq, seqsize, opts)) {
+        if (grow_seq(&seq, seqsize, opts.quiet)) {
           return 1;
         }
       }

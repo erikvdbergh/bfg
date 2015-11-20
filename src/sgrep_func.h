@@ -2,17 +2,11 @@
 #define SGREP_FUNC_H
 
 #include <regex.h>
+#include "util.h"
 
-#define MAX_FILENAME_LEN 2048
-#define MAX_FILES 2048
-#define MAX_REGEX_LEN 2048
-#define MAX_REGEXES 256
-#define MAX_LINE_LEN 2048
-#define MAX_SEQ_LEN 4294967296 // 4GB
+struct SgrepOpts;
 
-struct Opts;
-
-typedef struct OptsTag {
+typedef struct SgrepOptsTag {
   char regexes_input[MAX_REGEXES][MAX_REGEX_LEN]; //-e --regex DONE
   int regex_i;
   char file[MAX_FILENAME_LEN]; //-f --file DONE
@@ -28,14 +22,14 @@ typedef struct OptsTag {
   int only_matching; // -o --only-matching - print matching fasta header only DONE
   int quiet; //-q --quiet --silent DONE
   int nomsg; // -s --no-messages DONE
-} Opts;
+} SgrepOpts;
 
 void printmatch(char match[]);
 
-void compile_regexes(regex_t regexes[], Opts opts);
+void compile_regexes(regex_t regexes[], SgrepOpts opts);
 
-int getfilematch(FILE *fp, regex_t regexes[], Opts opts); 
+int getfilematch(FILE *fp, regex_t regexes[], SgrepOpts opts); 
 
-int read_regex_file(int argc, char **argv, Opts opts); 
+int read_regex_file(int argc, char **argv, SgrepOpts opts); 
 
 #endif /* SGREP_FUNC_H */

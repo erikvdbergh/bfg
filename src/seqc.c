@@ -11,7 +11,7 @@
  * @param argv: cli arguments
  * @return: 0 on success
  */ 
-int parseopts(int argc, char **argv, Opts *opts) {
+int parseopts(int argc, char **argv, SeqcOpts *opts) {
   char c;
 
   // by default count sequences and nucleotides
@@ -64,7 +64,7 @@ int parseopts(int argc, char **argv, Opts *opts) {
 }
 
 int main(int argc, char** argv) {
-  Opts opts;
+  SeqcOpts opts;
 
   parseopts(argc, argv, &opts);
 

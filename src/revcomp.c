@@ -10,7 +10,7 @@
 // global struct to hold program options
 
 // use gnuopt_long to parse opts
-void parseopts(int argc, char *argv[], Opts opts) {
+void parseopts(int argc, char *argv[], RevcompOpts opts) {
   struct option longopts[] = {
     {"add-suffix", no_argument, NULL, 'a'},
     {"file", required_argument, NULL, 'f'},
@@ -47,7 +47,7 @@ void parseopts(int argc, char *argv[], Opts opts) {
 }
 
 int main(int argc, char** argv) {
-  Opts opts;
+  RevcompOpts opts;
   parseopts(argc, argv, opts);
 
   // no files given, use stdin

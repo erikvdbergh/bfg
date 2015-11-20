@@ -37,7 +37,7 @@ void printseq(char *seqid, char *seq) {
   if (strcmp(seqid, "") && strcmp(seq, "")) {
   }
 }
-void print_header(char *seqid, Opts opts) {
+void print_header(char *seqid, SubseqOpts opts) {
   if (opts.header_coord) {
     printf("%s|%i:%i", seqid, opts.begin, opts.end);
   } else {
@@ -45,7 +45,7 @@ void print_header(char *seqid, Opts opts) {
   }
 }
 
-int process_file(FILE *fp, Opts opts) {
+int process_file(FILE *fp, SubseqOpts opts) {
   char seqid[2048];
 
   int insub = 0;

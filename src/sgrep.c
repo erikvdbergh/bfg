@@ -8,7 +8,7 @@
 #include "util.h"
 #include "sgrep_func.h"
 
-void parseopts(int argc, char *argv[], Opts opts) {
+void parseopts(int argc, char *argv[], SgrepOpts opts) {
   struct option longopts[] = {
     {"regexp", required_argument, NULL, 'e'},
     {"file"  , required_argument, NULL, 'f'},
@@ -90,7 +90,7 @@ void parseopts(int argc, char *argv[], Opts opts) {
 }
 
 int main(int argc, char** argv) {
-  Opts opts;
+  SgrepOpts opts;
   parseopts(argc, argv, opts);
 
   FILE *fp = stdin;
@@ -99,9 +99,7 @@ int main(int argc, char** argv) {
   int files = 0;
   int files_match = 0;
 
-  if (opts.file) {
-    read_regex_file(argc, argv, opts);
-  }
+  read_regex_file(argc, argv, opts);
 
   while (optind < argc) {
     strcpy(filename, argv[optind++]);
