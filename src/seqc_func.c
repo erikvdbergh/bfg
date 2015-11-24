@@ -26,7 +26,7 @@ int process_file(char *filename, int** counts, int file_i, int tots[4], SeqcOpts
   if (!strcmp(filename, "-")) {
     fp = stdin; 
   } else {
-    fp = open_file(filename, 0, 0);
+    fp = open_fasta(filename, 0, 0);
   }
   if (!fp) {
     return 1;

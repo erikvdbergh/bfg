@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
-#include <stdlib.h>
-#include <malloc.h>
 
 #include "util.h"
 #include "revcomp_func.h"
@@ -47,7 +45,8 @@ void parseopts(int argc, char *argv[], RevcompOpts opts) {
 }
 
 int main(int argc, char** argv) {
-  RevcompOpts opts;
+  RevcompOpts *opts_ptr = malloc(sizeof(RevcompOpts));
+  RevcompOpts opts = *opts_ptr;
   parseopts(argc, argv, opts);
 
   // no files given, use stdin
@@ -57,30 +56,34 @@ int main(int argc, char** argv) {
   }
 
   FILE *fp;
+  FastaSeq *seq = newFastaSeq();
 
   while (optind < argc) {
 
     // open stderr or file?
     if (strcmp(argv[optind],"-")) {
-      fp = fopen(argv[optind], "r");
+      fp = open_fasta(argv[optind], opts.nomsg, opts.quiet);
     } else {
       fp = stdin;
     }
 
-    // something went wrong opening file
-    if (fp == NULL) {
-      if (!opts.nomsg) {
-        fprintf(stderr, "Unable to open file %s\n", argv[optind]);
-      }
-      return 1;
-    }
+    while(!seq_next(fp, seq, opts.quiet)) {
+      reverse_str(seq->seq);
+      complement(seq->seq);
 
-    if (!process_file(fp, opts)) {
-      return 1;
+      if(opts.add_suffix) {
+        strcat(seq->header, "_revcomp");
+      }
+
+      printf("%s\n%s\n", seq->header, seq->seq);
+      clearFastaSeq(seq);
     }
 
     optind++;
   }
+
+  deleteFastaSeq(seq);
+  free(opts_ptr);
 
   return 0;
 }

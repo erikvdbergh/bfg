@@ -10,8 +10,24 @@
 #define MAX_LINE_LEN 2048
 #define MAX_SEQ_LEN 4294967296 // 4GB
 
+struct FastaSeq;
+
+typedef struct FastaSeqtag {
+  char *header;
+  char *seq;
+  int size;
+} FastaSeq;
+
+FastaSeq *newFastaSeq();
+
+int growFastaSeq(FastaSeq *seq, int quiet);
+
+void clearFastaSeq(FastaSeq *seq);
+
+void deleteFastaSeq(FastaSeq *seq);
+
 FILE *open_fasta(char filename[], int nomsg, int quiet);
 
-int seq_next(FILE *file, char **header, char **sequence, int quiet);
+int seq_next(FILE *file, FastaSeq *seq, int quiet);
 
 #endif /* UTIL_H */

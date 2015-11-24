@@ -15,14 +15,8 @@ typedef struct RevcompOptsTag {
   int add_suffix; // -a --add-suffix TODO
 } RevcompOpts;
 
-int initseq(char **seq, int seqsize, int quiet);
-
-int grow_seq(char **seq, int seqsize, int quiet);
-
 char *reverse_str(char *str);
 
 char *complement(char *seq);
-
-int process_file(FILE *fp, RevcompOpts opts);
 
 #endif /* REVCOMP_H */

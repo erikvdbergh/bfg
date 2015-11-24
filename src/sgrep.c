@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
   while (optind < argc) {
     strcpy(filename, argv[optind++]);
-    fp = open_file(filename, opts.nomsg, opts.quiet);
+    fp = open_fasta(filename, opts.nomsg, opts.quiet);
     if (!fp) {
       return 1;
     }

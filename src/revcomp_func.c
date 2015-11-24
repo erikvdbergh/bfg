@@ -7,36 +7,6 @@
 #include "util.h"
 #include "revcomp_func.h"
 
-// initialize the char array that holds the current sequence
-int initseq(char **seq, int seqsize, int quiet) {
-  *seq = calloc(seqsize,(sizeof(char)) );
-
-  if (!seq) {
-    if (!quiet) {
-      fprintf(stderr, "Could not allocate memory for sequence");
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-// double the size of the seq array with realloc
-int grow_seq(char **seq, int seqsize, int quiet) {
-  seqsize *= 2;
-
-  *seq = realloc(*seq, seqsize * sizeof(char));
-
-  if (seq == NULL) {
-    if (!quiet) {
-      fprintf(stderr, "Could not allocate memory for sequence");
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
 // reverse a string in place
 char *reverse_str(char *str) {
   int len = strlen(str);
@@ -62,69 +32,4 @@ char *complement(char *seq) {
   }
 
   return seq;
-}
-
-
-int process_file(FILE *fp, RevcompOpts opts) {
-
-  int seqsize = MAX_LINE_LEN;
-  int readsize = 0;
-  char line[MAX_LINE_LEN];
-  char header[MAX_LINE_LEN];
-  char *seq = NULL;
-
-  if (initseq(&seq, seqsize, opts.quiet)) {
-    return 1;
-  }
-
-  while (fgets(line, MAX_LINE_LEN, fp) != NULL) {
-    line[strcspn(line, "\n")] = 0;
-
-    //fasta header, end of sequence
-    if (line[0] == '>') {
-
-      // revcomp and print
-      seq = reverse_str(seq);
-      seq = complement(seq);
-      if (strcmp(header,"") != 0) {
-        printf("%s\n%s\n", header, seq);
-      }
-
-      // prepare new seq string
-      free(seq);
-      seqsize = MAX_LINE_LEN;
-      if (initseq(&seq, seqsize, opts.quiet)) {
-        return 1;
-      }
-
-      // store header
-      strcpy(header, line);
-
-    // sequence, add to current sequence
-    } else {
-      int linelen = strlen(line);
-
-      // current line will cause seq to overflow, grow it
-      if (readsize + linelen > seqsize) {
-        if (grow_seq(&seq, seqsize, opts.quiet)) {
-          return 1;
-        }
-      }
-
-      // concat read seq to current
-      strcat(seq, line);
-      readsize += linelen;
-    }
-  }
-
-  // print final seq
-  seq = reverse_str(seq);
-  seq = complement(seq);
-  if (strcmp(header,"") != 0) {
-    printf("%s\n%s\n", header, seq);
-  }
-
-  // no memleaks
-  free(seq);
-  return 0;
 }

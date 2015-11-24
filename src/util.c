@@ -4,6 +4,51 @@
 #include "util.h"
 
 
+FastaSeq *newFastaSeq() {
+  FastaSeq *seq = malloc(sizeof(FastaSeq));
+
+  seq->header = malloc(MAX_LINE_LEN * sizeof(char));
+  if (seq->header == NULL) {
+    return NULL;
+  }
+  seq->header[0] = '\0';
+
+  seq->seq = malloc(MAX_LINE_LEN * sizeof(char));
+  if (seq->seq == NULL) {
+    return NULL;
+  }
+  seq->seq[0] = '\0';
+
+  seq->size = MAX_LINE_LEN;
+  return seq;
+}
+
+int growFastaSeq(FastaSeq *seq, int quiet) {
+
+  seq->seq = realloc(seq->seq, (seq->size * 2) * sizeof(char));
+
+  if (seq->seq == NULL) {
+    if (!quiet) {
+      fprintf(stderr, "Could not allocate memory for a");
+    }
+    return 1;
+  }
+
+  seq->size *= 2;
+
+  return 0;
+}
+
+void clearFastaSeq(FastaSeq *seq) {
+  seq->header[0] = '\0';
+  seq->seq[0] = '\0';
+}
+
+void deleteFastaSeq(FastaSeq *seq) {
+  free(seq->header);
+  free(seq->seq);
+}
+
 FILE *open_fasta(char filename[], int nomsg, int quiet) {
   FILE *fp;
 
@@ -16,76 +61,44 @@ FILE *open_fasta(char filename[], int nomsg, int quiet) {
   return fp;
 }
 
-int initseq(char **seq, int seqsize, int quiet) {
-  *seq = calloc(seqsize,(sizeof(char)) );
 
-  if (!seq) {
-    if (!quiet) {
-      fprintf(stderr, "Could not allocate memory for sequence");
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-int grow_seq(char **seq, int seqsize, int quiet) {
-  seqsize *= 2;
-
-  *seq = realloc(*seq, seqsize * sizeof(char));
-
-  if (seq == NULL) {
-    if (!quiet) {
-      fprintf(stderr, "Could not allocate memory for sequence");
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-int seq_next(FILE *file, char **header, char **sequence, int quiet) {
+int seq_next(FILE *file, FastaSeq *seq, int quiet) {
   char line[MAX_LINE_LEN];
-  char *seq;
 
   int firstline = 1;
 
-  int seqsize = 2048;
   int readsize = 0;
 
-
-  if (initseq(&seq, seqsize, quiet)) {
-    if (!quiet) {
-      return 1;
-     }
+  // check for end of file
+  char c = fgetc(file);
+  if(c == EOF) {
+    return 1;
+  } else {
+    ungetc(c, file);
   }
 
   while (fgets(line, MAX_LINE_LEN, file) != NULL) {
     line[strcspn(line, "\n")] = 0;
     if (firstline) {
-      strcpy(*header, line);
+      strcpy(seq->header, line);
       firstline = 0;
       continue;
     }
 
     int linelen = strlen(line);
-    if (readsize + linelen > seqsize) {
-      if(grow_seq(&seq, seqsize, quiet)){
-        free(seq);
+    if (readsize + linelen > seq->size) {
+      if(growFastaSeq(seq, quiet)){
+        deleteFastaSeq(seq);
         return 1;
       }
-      seqsize *= 2;
     }
 
-    strcat(seq, line);
+    strcat(seq->seq, line);
     readsize += linelen;
 
-
     char c = fgetc(file);
-
+    ungetc(c, file);
     if(c == '>') {
-      ungetc(c, file);
-      *sequence = seq;
       break;
     }
   }

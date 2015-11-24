@@ -94,7 +94,7 @@ int getfilematch(FILE *fp, regex_t regexes[], SgrepOpts opts) {
 }
 
 int read_regex_file(int argc, char **argv, SgrepOpts opts) {
-  FILE *fp = open_file(opts.file, opts.nomsg, opts.quiet);
+  FILE *fp = open_fasta(opts.file, opts.nomsg, opts.quiet);
   if (!fp) {
     return 1;
   }
