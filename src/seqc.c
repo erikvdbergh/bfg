@@ -15,12 +15,8 @@ int parseopts(int argc, char **argv, SeqcOpts *opts) {
   char c;
 
   // by default count sequences and nucleotides
-  opts->sgiven = 0;
-  opts->cgiven = 0;
-  opts->totals = 0;
   opts->countnuc = 1;
   opts->countseq = 1;
-  opts->countlong = 0;
 
   struct option longopts[] = {
     {"characters", no_argument, NULL, 'c'},
@@ -64,11 +60,10 @@ int parseopts(int argc, char **argv, SeqcOpts *opts) {
 }
 
 int main(int argc, char** argv) {
-  SeqcOpts opts;
+  SeqcOpts *opts_ptr = calloc(1, sizeof(SeqcOpts));
+  SeqcOpts opts = *opts_ptr;
 
   parseopts(argc, argv, &opts);
-
-  //char filename[256] = "";
 
   // print totals if more than 1 file
   opts.totals = argc - optind > 1 ? 1 : 0;
@@ -79,40 +74,45 @@ int main(int argc, char** argv) {
     argc++;
   }
 
-  // hold totals across files
-  // tots[0] = nucleotides
-  // tots[1] = sequences
-  // tots[2] = longest seq
-  // tots[3] = character width of highest count (for print alignment)
-  int tots[4];
 
-  tots[3] = 3; // default width of table column
+  // counts structure as follows:
+  // 0	totallong	totalnuc	totalseq
+  // 1  file1long	file1nuc	file1seq
+  // 2  file2seq	file2nuc	file2seq
+  // ...etc...
+  // filenames has filenames at same row index (or "total" at i = 0);
+  // 
+  int **counts = malloc((MAX_FILES+1) * sizeof(int*));
+  if (!counts)
+    return 1;
 
-  int **counts = malloc(3 * sizeof(int*));
-  if (counts) {
-    int i = 0;
-    for (i = 0; i < 3; i++) {
-      counts[i] = malloc(MAX_FILES * sizeof(int));
-    }
-  }
+  counts[0] = calloc(3, sizeof(int));
 
   char **filenames = malloc(MAX_FILES * sizeof(char*));
-  if (filenames) {
-    int i = 0;
-    for (i = 0; i < MAX_FILES; i++) {
-      filenames[i] = malloc(MAX_FILENAME_LEN * sizeof(char));
-    }
+  if (!filenames)
+    return 1;
+
+  if (opts.countlong) {
+    filenames[0] = "longest";
+  } else {
+    filenames[0] = "total";
   }
 
   int file_i = 0;
 
   while (optind < argc && file_i < MAX_FILES-1) {
-    process_file(argv[optind++], counts, file_i, tots, opts);
-    strcpy(filenames[file_i++],argv[optind-1]);
+    // store filename
+    filenames[file_i+1] = malloc(MAX_FILENAME_LEN * sizeof(char));
+    strcpy(filenames[file_i+1], argv[optind]);
+
+    FILE *file = open_fasta(argv[optind++], 0, 0);
+
+    countfile(file, &counts, file_i++);
+    fclose(file);
   } 
 
   // print the whole lot
-  printcounts(counts, tots, filenames, file_i, opts);
+  printcounts(counts, filenames, file_i, opts);
 
   if (file_i > MAX_FILES-2) {
     fprintf(stderr, "seqc supports up to %i files, rest is ignored. Recompile with MAX_FILES=x if you need more\n", MAX_FILES);
@@ -120,14 +120,16 @@ int main(int argc, char** argv) {
 
   // cleanup
   int i = 0;
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < file_i+1; i++) {
     free(counts[i]);
   }
   free(counts);
-  for (i = 0; i < MAX_FILES; i++) {
+
+  for (i = 1; i < file_i+1; i++) {
     free(filenames[i]);
   }
   free(filenames);
+  free(opts_ptr);
 
   return 0;
 }

@@ -19,8 +19,8 @@ typedef struct SeqcOptsTag {
 
 int digitlen(int i); 
 
-int process_file(char *filename, int** counts, int file_i, int tots[4], SeqcOpts opts);
+int countfile(FILE *file, int ***counts, int file_i);
 
-void printcounts(int** counts, int tots[4], char** filenames, int file_i, SeqcOpts opts);
+void printcounts(int** counts, char** filenames, int file_i, SeqcOpts opts);
 
 #endif /* SEQC_H */

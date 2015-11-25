@@ -47,6 +47,7 @@ void clearFastaSeq(FastaSeq *seq) {
 void deleteFastaSeq(FastaSeq *seq) {
   free(seq->header);
   free(seq->seq);
+  free(seq);
 }
 
 FILE *open_fasta(char filename[], int nomsg, int quiet) {
