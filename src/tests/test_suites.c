@@ -9,9 +9,9 @@
 #include <CUnit/Basic.h>
 
 #include "../util.h"
-//#include "../subseq_func.h"
-//#include "../seqc_func.h"
-//#include "../sgrep_func.h"
+#include "../subseq_func.h"
+#include "../seqc_func.h"
+#include "../sgrep_func.h"
 #include "../revcomp_func.h"
 
 /* Test Suite setup and cleanup functions: */
@@ -138,10 +138,19 @@ void test_seq_next(void) {
 }
 
 // subseq tests
-void test_substr(void) {}
+void test_substr(void) {
+  FastaSeq *seq = newFastaSeq();
+  strcpy(seq->seq, "This is a testseq");
+  subseq(seq, 5,  10);
+  CU_ASSERT_STRING_EQUAL(seq->seq, " is a ");
+}
 
 // seqc tests
-void test_digitlen(void) { }
+void test_digitlen(void) { 
+  CU_ASSERT_EQUAL(digitlen(100),3);
+  CU_ASSERT_EQUAL(digitlen(1000),4);
+  CU_ASSERT_EQUAL(digitlen(1),1);
+}
 
 // sgrep tests
 void test_compile_regexes(void) {}
@@ -176,6 +185,26 @@ void test_revcomp(void) {
 }
 
 void test_subseq(void) {
+  if (!fileexists("bin/subseq") ||
+      !fileexists("testdata/testall.fa") ||
+      !fileexists("test/results/subseqtest1") ||
+      !fileexists("test/results/subseqtest2")) {
+    return;
+  }
+  system("bin/./subseq testdata/testall.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest1"));
+
+  system("cat testdata/testall.fa | bin/./subseq > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest1"));
+
+  // test with header add
+  system("bin/./subseq -h testdata/testall.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest2"));
+
+  // Arabidopsis TAIR test CYP79F2 gene (AT1G16400)
+  // requires specific local setup, should probs not be in public code
+  system("bin./subseq ~/Dropbox/Projects_BAK/Sequences/A_thaliana/TAIR10_chr1.fas -h -b 5605159 -e 5607473 > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/CYP79F2.fa"));
 
 }
 
@@ -198,9 +227,35 @@ void test_sgrep(void) {
   // two regexps
   system("bin/./sgrep -e \"seq3\" -e \"seq2\" testdata/testall.fa > out");
   CU_ASSERT_FALSE(filediff("out", "test/results/sgreptest2"));
+  
 }
 
 void test_seqc(void) {
+  if (!fileexists("bin/seqc") ||
+      !fileexists("testdata/testall.fa") ||
+      !fileexists("test/results/seqctest1") ||
+      !fileexists("test/results/seqctest2")) {
+    return;
+  }
+
+  // file as argument
+  system("bin/./seqc testdata/testall.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/seqctest1"));
+
+  // file thru stdin
+  system("cat testdata/testall.fa | bin/./seqc > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/seqctest2"));
+
+  // test multiple files
+  system("bin/./seqc testdata/*.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/seqctest3"));
+
+  // test longest option
+  system("bin/./seqc -L testdata/testbiggerseq.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/seqctest4"));
+
+  system("bin/./seqc -L testdata/*.fa > out");
+  CU_ASSERT_FALSE(filediff("out", "test/results/seqctest5"));
 
 }
 
@@ -272,7 +327,6 @@ int main(void) {
 
    if (
         (NULL == CU_add_test(sgrepSuite, "test_compile_regexes", test_compile_regexes)) ||
-        (NULL == CU_add_test(sgrepSuite, "test_getfilematch", test_getfilematch)) ||
         (NULL == CU_add_test(sgrepSuite, "test_read_regex_file", test_read_regex_file))
    )
    {
@@ -288,10 +342,7 @@ int main(void) {
    }
 
    if (
-        (NULL == CU_add_test(sseqSuite, "test_substr", test_substr)) || 
-        (NULL == CU_add_test(sseqSuite, "test_printseq", test_printseq)) ||
-        (NULL == CU_add_test(sseqSuite, "test_print_header", test_print_header)) ||
-        (NULL == CU_add_test(sseqSuite, "test_process_file", test_process_file))
+        (NULL == CU_add_test(sseqSuite, "test_substr", test_substr))
    )
    {
       CU_cleanup_registry();
@@ -308,7 +359,7 @@ int main(void) {
    /* add the tests to the suite */
    if ( (NULL == CU_add_test(vSuite, "test_revcomp", test_revcomp)) ||
         (NULL == CU_add_test(vSuite, "test_seqc", test_seqc)) ||
-        (NULL == CU_add_test(vSuite, "test_sgrep", test_sgrep)) ||
+       // (NULL == CU_add_test(vSuite, "test_sgrep", test_sgrep)) ||
         (NULL == CU_add_test(vSuite, "test_subseq", test_subseq))
    )
    {

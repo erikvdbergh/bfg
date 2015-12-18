@@ -4,7 +4,7 @@ CFLAGS = -Wall -Werror -ggdb #debug
 TESTFLAGS = -Wall -ggdb -I/usr/local/include
 
 DEPS = src/util.c
-TESTDEPS = src/util.c src/revcomp_func.c
+TESTDEPS = src/util.c src/revcomp_func.c src/sgrep_func.c src/subseq_func.c src/seqc_func.c
 
 all: bin/seqc bin/sgrep bin/subseq bin/revcomp 
 

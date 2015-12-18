@@ -8,6 +8,7 @@
 #define MAX_REGEX_LEN 2048
 #define MAX_REGEXES 256
 #define MAX_LINE_LEN 2048
+#define SEQ_INIT 33554432
 #define MAX_SEQ_LEN 4294967296 // 4GB
 
 struct FastaSeq;

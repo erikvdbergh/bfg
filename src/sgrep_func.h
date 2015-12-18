@@ -26,10 +26,10 @@ typedef struct SgrepOptsTag {
 
 void printmatch(char match[]);
 
-void compile_regexes(regex_t regexes[], SgrepOpts opts);
+void compile_regexes(regex_t regexes[], SgrepOpts *opts);
 
-int getfilematch(FILE *fp, regex_t regexes[], SgrepOpts opts); 
+int getfilematch(FILE *fp, regex_t regexes[], SgrepOpts *opts); 
 
-int read_regex_file(int argc, char **argv, SgrepOpts opts); 
+int read_regex_file(int argc, char **argv, SgrepOpts *opts); 
 
 #endif /* SGREP_FUNC_H */
