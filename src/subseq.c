@@ -70,15 +70,15 @@ int parseopts(int argc, char **argv, SubseqOpts *opts) {
   }
 
   if (!opts->begingiven && !opts->endgiven) {
-    if (argv[optind]) {
+    /*if (optind != argc) {
       opts->begin = atoi(argv[optind++]);
       opts->end = atoi(argv[optind++]);
-    } else {
+    } else {*/
       if (!opts->quiet) {
         fprintf(stderr, "subseq: Begin and end coordinates need to be specified\n");
       }
       return 1;
-    }
+    //}
   }
 
   if (opts->begin > opts->end) {

@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -Werror -ggdb #debug
+CFLAGS = -Wall -Werror -ggdb -pg #debug
 TESTFLAGS = -Wall -ggdb -I/usr/local/include
 
 DEPS = src/util.c

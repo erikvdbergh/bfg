@@ -191,19 +191,19 @@ void test_subseq(void) {
       !fileexists("test/results/subseqtest2")) {
     return;
   }
-  system("bin/./subseq testdata/testall.fa > out");
+  system("bin/./subseq -b 5 -e 10 testdata/testall.fa > out");
   CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest1"));
 
-  system("cat testdata/testall.fa | bin/./subseq > out");
+  system("cat testdata/testall.fa | bin/./subseq -b 5 -e 10 > out");
   CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest1"));
 
   // test with header add
-  system("bin/./subseq -h testdata/testall.fa > out");
+  system("bin/./subseq -b 5 -e 10 -h testdata/testall.fa > out");
   CU_ASSERT_FALSE(filediff("out", "test/results/subseqtest2"));
 
   // Arabidopsis TAIR test CYP79F2 gene (AT1G16400)
   // requires specific local setup, should probs not be in public code
-  system("bin./subseq ~/Dropbox/Projects_BAK/Sequences/A_thaliana/TAIR10_chr1.fas -h -b 5605159 -e 5607473 > out");
+  system("bin/./subseq ~/Dropbox/Projects_BAK/Sequences/A_thaliana/TAIR10_chr1.fas -h -b 5605159 -e 5607473 > out");
   CU_ASSERT_FALSE(filediff("out", "test/results/CYP79F2.fa"));
 
 }
@@ -359,7 +359,7 @@ int main(void) {
    /* add the tests to the suite */
    if ( (NULL == CU_add_test(vSuite, "test_revcomp", test_revcomp)) ||
         (NULL == CU_add_test(vSuite, "test_seqc", test_seqc)) ||
-       // (NULL == CU_add_test(vSuite, "test_sgrep", test_sgrep)) ||
+        (NULL == CU_add_test(vSuite, "test_sgrep", test_sgrep)) ||
         (NULL == CU_add_test(vSuite, "test_subseq", test_subseq))
    )
    {
