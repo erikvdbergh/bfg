@@ -1,7 +1,7 @@
 ## General
 
 ## revcomp
-- Everything O.o
+- Captitals vs lowercase, keep cap but reverse it all
 
 ##seqc
 - bugfix: stdin reading
